@@ -5,6 +5,7 @@ import { saveAs } from 'file-saver';
 import { ApiService } from '../services/api.service';
 
 import { validateEmail } from './table-validators.service';
+import { AuthService } from '../services/auth.service';
 
 @Component({
   selector: 'app-supervisor-dashboard',
@@ -14,7 +15,27 @@ import { validateEmail } from './table-validators.service';
 export class SupervisorDashboardComponent {
   jobForm: FormGroup;
 
-  constructor(private fb: FormBuilder, private _api: ApiService) { }
+  machines = [{
+    id: 1,
+    name: 'd-1'
+  }, {
+    id: 2,
+    name: 'd-2'
+  },
+  {
+    id: 3,
+    name: 'd-3'
+  },
+  {
+    id: 4,
+    name: 'd-4'
+  },
+  {
+    id: 5,
+    name: 'd-5'
+  }];
+
+  constructor(private fb: FormBuilder, private _api: ApiService, private _auth: AuthService,) { }
 
   ngOnInit() {
     this.jobForm = this.fb.group({
@@ -30,28 +51,32 @@ export class SupervisorDashboardComponent {
 
       for (const job of res.data.jobs) {
         const grp = this.fb.group({
-          deviceId: [job.deviceId],
-          jobName: [job.jobName, Validators.required],
-          expectedOp: [job.expectedOp],
-          actualOp: [job.actualOp],
-          startTime: [],
-          endTime: [],
-          operatorName: [job.operatorName],
+          id: job.id,
+          machine: [{ value: job.machine, disabled: true }, Validators.required],
+          jobName: [{ value: job.jobName, disabled: true }, Validators.required],
+          targetQty: [job.targetQty, Validators.required],
+          actualQty: [job.actualQty],
+          startTime: [{ value: job.startTime, disabled: new Date(job.startTime) < new Date() ? true : false }, Validators.required],
+          endTime: [{ value: job.endTime, disabled: new Date(job.endTime) < new Date() ? true : false }, Validators.required],
+          operatorName: [job.operatorName, Validators.required],
+          remarks: ['System generated - Actual quantity is not updated']
         });
         control.push(grp);
       }
     });
   }
 
-  initiatForm(): FormGroup {
+  initiatForm(id): FormGroup {
     return this.fb.group({
-      deviceId: [''],
+      id: ++id,
+      machine: [{ value: '', disabled: false }, Validators.required],
       jobName: ['', Validators.required],
-      expectedOp: [0],
-      actualOp: [0],
-      startTime: [],
-      endTime: [],
-      operatorName: [],
+      targetQty: [0, Validators.required],
+      actualQty: [0],
+      startTime: ['', Validators.required],
+      endTime: ['', Validators.required],
+      operatorName: ['', Validators.required],
+      remarks: ['System generated - Actual quantity is not updated']
     });
   }
 
@@ -59,9 +84,11 @@ export class SupervisorDashboardComponent {
     return <FormArray>this.jobForm.get('jobs');
   }
 
-  addUser() {
+  addRow() {
     const control = <FormArray>this.jobForm.get('jobs');
-    control.push(this.initiatForm());
+    control.push(this.initiatForm(control?.value?.length));
+    console.log('heyy');
+
   }
 
   remove(index: number) {
@@ -71,7 +98,18 @@ export class SupervisorDashboardComponent {
 
   save() {
     console.log('isValid', this.jobForm.valid);
-    console.log('value', this.jobForm.value);
+    console.log('value', this.jobForm.getRawValue());
+    let userName: string = JSON.parse(localStorage.getItem('userData') || '{}')?.rows[0]?.username;
+    let submitForm = this.jobForm.getRawValue();
+
+    submitForm.jobs.forEach(element => {
+      element['updatedBy'] = userName;
+    });
+
+    this._api.postTypeRequest('manageJobs/save', submitForm).subscribe((res: any) => {
+      console.log(res, 'heya');
+      this.jobForm.reset();
+    })
   }
 
 
@@ -82,7 +120,7 @@ export class SupervisorDashboardComponent {
 
   // @ViewChild('table') table: MatTable<any>;
 
-  // displayedColumns = ['deviceId', 'jobName', 'expectedOp', 'actualOp', 'startTime', 'endTime', 'operatorName'];
+  // displayedColumns = ['deviceId', 'jobName', 'targetQty', 'actualQty', 'startTime', 'endTime', 'operatorName'];
   // dataSource: MatTableDataSource<AbstractControl>;
 
   // get productControlArray() {
@@ -122,8 +160,8 @@ export class SupervisorDashboardComponent {
 
   //     //       this.productControlArray.value[i].deviceId = i,
   //     //       this.productControlArray.value[i].jobName = element.jobName,
-  //     //       this.productControlArray.value[i].expectedOp = element.expectedOp,
-  //     //       this.productControlArray.value[i].actualOp = element.actualOp,
+  //     //       this.productControlArray.value[i].targetQty = element.targetQty,
+  //     //       this.productControlArray.value[i].actualQty = element.actualQty,
   //     //       // this.productControlArray.value[i].startTime = [],
   //     //       // this.productControlArray.value[i].endTime = [],
   //     //       this.productControlArray.value[i].operatorName = element.operatorName
@@ -138,8 +176,8 @@ export class SupervisorDashboardComponent {
   //           deviceId: i,
   //           // product_id: [undefined, Validators.required],
   //           jobName: [``, Validators.required],
-  //           expectedOp: [0, Validators.required],
-  //           actualOp: [0, Validators.required],
+  //           targetQty: [0, Validators.required],
+  //           actualQty: [0, Validators.required],
   //           startTime: [],
   //           endTime: [],
   //           operatorName: ['']

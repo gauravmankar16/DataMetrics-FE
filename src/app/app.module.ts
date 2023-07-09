@@ -21,6 +21,7 @@ import { AuthModule } from './auth/auth/auth.module';
 import { ProfileComponent } from './main/profile/profile.component';
 import { HTTP_INTERCEPTORS } from '@angular/common/http';
 import { InterceptorService } from './services/interceptor-service.service';
+import { MatSelectModule } from '@angular/material/select';
 
 @NgModule({
   declarations: [
@@ -45,6 +46,7 @@ import { InterceptorService } from './services/interceptor-service.service';
     AppRoutingModule,
     RouterModule,
     AuthModule,
+    MatSelectModule
   ],
   providers: [
     {

@@ -1,43 +1,67 @@
-<div class="container-fluid p-0">
+<div class="container-fluid p-1">
   <form [formGroup]="jobForm">
     <table class="table">
       <thead>
-        <th>Device Id</th>
+        <th>Machine</th>
         <th>Job Name</th>
-        <th>Expected Output</th>
-        <th>Actual Output</th>
+        <th>Operator Name</th>
+        <th>Target Quantity</th>
+        <th>Actual Quantity</th>
         <th>Start Time</th>
         <th>End Time</th>
-        <th>Operator Name</th>
+        <th>Remarks</th>
       </thead>
       <tbody formArrayName="jobs" *ngFor="let group of getFormData.controls; let i=index">
         <tr [formGroupName]="i">
           <td class="form-group">
-            <input type="text" class="form-control" formControlName="deviceId" placeholder="deviceId">
-            <span class="text-danger" *ngIf="group.get('deviceId')?.touched && group.get('deviceId')?.invalid">Device is required</span>
+
+            <mat-select class="form-control" placeholder="machine" formControlName="machine">
+              <mat-option>--</mat-option>
+              <mat-option *ngFor="let category of machines" [value]="category.name">
+                {{category.name}}
+              </mat-option>
+            </mat-select>
+            <span class="text-danger" *ngIf="group.get('machine')?.touched && group.get('machine')?.invalid">Machine is
+              required</span>
+
+
+            <!-- <input type="text" class="form-control" formControlName="machine" placeholder="machine">
+            <span class="text-danger" *ngIf="group.get('machine')?.touched && group.get('machine')?.invalid">Machine is required</span> -->
           </td>
           <td class="form-group">
             <input type="text" class="form-control" formControlName="jobName" placeholder="jobName">
-            <span class="text-danger" *ngIf="group.get('jobName')?.touched && group.get('jobName')?.invalid">Job name is required</span>
-          </td>
-          <td class="form-group">
-            <input type="text" class="form-control" formControlName="expectedOp" placeholder="expectedOp">
-            <span class="text-danger" *ngIf="group.get('expectedOp')?.touched && group.get('expectedOp')?.invalid">Device is required</span>
-          </td>
-          <td class="form-group">
-            <input type="text" class="form-control" formControlName="actualOp" placeholder="actualOp">
-            <span class="text-danger" *ngIf="group.get('actualOp')?.touched && group.get('actualOp')?.invalid">Device is required</span>
-          </td>
-          <td class="form-group">
-            <input type="datetime-local" class="form-control" formControlName="startTime" placeholder="startTime">
-            <span class="text-danger" *ngIf="group.get('startTime')?.touched && group.get('startTime')?.invalid">Device is required</span>
-          </td>
-          <td class="form-group">
-            <input type="datetime-local" class="form-control" formControlName="endTime" placeholder="endTime">
-            <span class="text-danger" *ngIf="group.get('endTime')?.touched && group.get('endTime')?.invalid">Device is required</span>
+            <span class="text-danger" *ngIf="group.get('jobName')?.touched && group.get('jobName')?.invalid">Job name is
+              required</span>
           </td>
           <td class="form-group">
             <input type="text" class="form-control" formControlName="operatorName" placeholder="operatorName">
+            <span class="text-danger"
+              *ngIf="group.get('operatorName')?.touched && group.get('operatorName')?.invalid">Operator name is
+              required</span>
+          </td>
+          <td class="form-group">
+            <input type="text" class="form-control" formControlName="targetQty" placeholder="targetQty">
+            <span class="text-danger" *ngIf="group.get('targetQty')?.touched && group.get('targetQty')?.invalid">Target
+              qantity is required</span>
+          </td>
+          <td class="form-group">
+            <input type="text" class="form-control" formControlName="actualQty" placeholder="actualQty">
+            <span class="text-danger" *ngIf="group.get('actualQty')?.touched && group.get('actualQty')?.invalid">Device
+              is required</span>
+          </td>
+          <td class="form-group">
+            <input type="datetime-local" class="form-control" formControlName="startTime" placeholder="startTime">
+            <span class="text-danger" *ngIf="group.get('startTime')?.touched && group.get('startTime')?.invalid">Start
+              time is required</span>
+          </td>
+          <td class="form-group">
+            <input type="datetime-local" class="form-control" formControlName="endTime" placeholder="endTime">
+            <span class="text-danger" *ngIf="group.get('endTime')?.touched && group.get('endTime')?.invalid">End time is
+              required</span>
+          </td>
+          <td class="form-group">
+            <input type="text" class="form-control" formControlName="remarks" placeholder="remarks">
+            <!-- <span class="text-danger" *ngIf="group.get('remarks')?.touched && group.get('remarks')?.invalid">Operator name is required</span> -->
           </td>
 
 
@@ -60,13 +84,15 @@
             <mat-datetimepicker-toggle matSuffix [for]="datetimePicker"></mat-datetimepicker-toggle>
             <mat-datetimepicker #datetimePicker></mat-datetimepicker>
           </td> -->
-          <td>
-            <button (click)="remove(i)" class="btn btn-primary mr-5">Remove</button>
-          </td>
+          <!-- <td>
+            <button (click)="remove(i)" class="">
+              <mat-icon>close</mat-icon>
+            </button>
+          </td> -->
         </tr>
       </tbody>
     </table>
   </form>
-  <button (click)="addUser()" class="btn btn-primary mr-5">Add new</button>
+  <button (click)="addRow()" class="btn btn-primary mr-5">Add new</button>
   <button (click)="save()" [disabled]="jobForm.invalid" class="btn btn-primary">Save</button>
 </div>

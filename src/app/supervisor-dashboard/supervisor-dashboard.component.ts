@@ -1,10 +1,8 @@
 import { Component, ViewChild } from '@angular/core';
-import { AbstractControl, FormArray, FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { MatTable, MatTableDataSource } from '@angular/material/table';
-import { saveAs } from 'file-saver';
+import { AbstractControl, FormArray, FormBuilder, FormGroup, NgForm, Validators } from '@angular/forms';
 import { ApiService } from '../services/api.service';
 
-import { validateEmail } from './table-validators.service';
+import { DateValidator, validateEmail } from './table-validators.service';
 import { AuthService } from '../services/auth.service';
 
 @Component({
@@ -14,6 +12,7 @@ import { AuthService } from '../services/auth.service';
 })
 export class SupervisorDashboardComponent {
   jobForm: FormGroup;
+  savedJobs = [];
 
   machines = [{
     id: 1,
@@ -48,25 +47,31 @@ export class SupervisorDashboardComponent {
     const control = <FormArray>this.jobForm.get('jobs');
     this._api.getTypeRequest('manageJobs/get').subscribe((res: any) => {
       console.log(res, 'resp');
+      this.savedJobs = res.data.jobs;
 
       for (const job of res.data.jobs) {
         const grp = this.fb.group({
           id: job.id,
           machine: [{ value: job.machine, disabled: true }, Validators.required],
           jobName: [{ value: job.jobName, disabled: true }, Validators.required],
-          targetQty: [job.targetQty, Validators.required],
+          targetQty: [{ value: job.targetQty, disabled: true }, Validators.required],
           actualQty: [job.actualQty],
           startTime: [{ value: job.startTime, disabled: new Date(job.startTime) < new Date() ? true : false }, Validators.required],
-          endTime: [{ value: job.endTime, disabled: new Date(job.endTime) < new Date() ? true : false }, Validators.required],
+          endTime: [{ value: job.endTime, disabled: new Date(job.endTime) < new Date() ? true : false }, Validators.compose([Validators.required])],
           operatorName: [job.operatorName, Validators.required],
-          remarks: ['System generated - Actual quantity is not updated']
+          remarks: [job.remarks]
         });
         control.push(grp);
       }
+
+      // this.getFormData?.valueChanges.subscribe((changes) => {
+      //   console.log(changes, 'changes2');
+
+      // })
     });
   }
 
-  initiatForm(id): FormGroup {
+  initiateForm(id): FormGroup {
     return this.fb.group({
       id: ++id,
       machine: [{ value: '', disabled: false }, Validators.required],
@@ -76,7 +81,7 @@ export class SupervisorDashboardComponent {
       startTime: ['', Validators.required],
       endTime: ['', Validators.required],
       operatorName: ['', Validators.required],
-      remarks: ['System generated - Actual quantity is not updated']
+      remarks: ['System generated: Actual quantity is not updated']
     });
   }
 
@@ -86,7 +91,7 @@ export class SupervisorDashboardComponent {
 
   addRow() {
     const control = <FormArray>this.jobForm.get('jobs');
-    control.push(this.initiatForm(control?.value?.length));
+    control.push(this.initiateForm(control?.value?.length));
     console.log('heyy');
 
   }
@@ -96,14 +101,49 @@ export class SupervisorDashboardComponent {
     control.removeAt(index);
   }
 
+  dateChange(i, type, updatedRow) {
+    if (this.savedJobs.length >= i) {
+      let orgObj = this.savedJobs[i];
+      if (new Date(updatedRow.value.endTime) < new Date(orgObj['endTime'])) {
+        this.autoAdjustTargetQty(orgObj, updatedRow.value);
+      } else {
+        updatedRow.value = orgObj['endTime'];
+        alert('End time cannot be increased after setting once. Please create new job.')
+      }
+    }
+  }
+
+  autoAdjustTargetQty(orgObj, updatedObj) {
+    const originalDiff = Math.round((new Date(orgObj.endTime).getTime() - new Date(orgObj.startTime).getTime()) / 60000);
+    const updatedDiff = Math.round((new Date(updatedObj.endTime).getTime() - new Date(updatedObj.startTime).getTime()) / 60000);
+    console.log(originalDiff, 'old\n', updatedDiff, 'new');
+
+    const orgPerMinuteJobs = Math.round(orgObj.targetQty / originalDiff);
+    const newTargetQty = Math.round(orgPerMinuteJobs * updatedDiff);
+    console.log(orgPerMinuteJobs, 'orgPerMinuteJobs\n', orgObj.targetQty, 'org targetqty');
+    console.log(newTargetQty, 'newTargetQty\n');
+    updatedObj['newTargetQty'] = newTargetQty;
+    console.log(updatedObj);
+
+  }
+
   save() {
-    console.log('isValid', this.jobForm.valid);
+    // console.log('isValid', this.jobForm.valid);
+    const control = this.jobForm.get('jobs') as FormArray;
+    let touchedRows = control.controls.filter(row => row.touched).map(row => row.value);
+    console.log(touchedRows, 'touchedRows\n');
+
     console.log('value', this.jobForm.getRawValue());
     let userName: string = JSON.parse(localStorage.getItem('userData') || '{}')?.rows[0]?.username;
     let submitForm = this.jobForm.getRawValue();
 
-    submitForm.jobs.forEach(element => {
+    submitForm.jobs.forEach((element, index) => {
       element['updatedBy'] = userName;
+      const newTargetQty = this.jobForm.value.jobs[index]?.newTargetQty;
+      if (newTargetQty) {
+        element.targetQty = newTargetQty;
+        element.remarks = 'System generated: Target quantity auto adjusted'
+      }
     });
 
     this._api.postTypeRequest('manageJobs/save', submitForm).subscribe((res: any) => {

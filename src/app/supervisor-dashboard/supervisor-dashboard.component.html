@@ -5,8 +5,8 @@
         <th>Machine</th>
         <th>Job Name</th>
         <th>Operator Name</th>
-        <th>Target Quantity</th>
-        <th>Actual Quantity</th>
+        <th style="width: 120px;">Target Quantity</th>
+        <th style="width: 120px;">Actual Quantity</th>
         <th>Start Time</th>
         <th>End Time</th>
         <th>Remarks</th>
@@ -40,12 +40,12 @@
               required</span>
           </td>
           <td class="form-group">
-            <input type="text" class="form-control" formControlName="targetQty" placeholder="targetQty">
+            <input type="number" class="form-control" formControlName="targetQty" placeholder="targetQty">
             <span class="text-danger" *ngIf="group.get('targetQty')?.touched && group.get('targetQty')?.invalid">Target
               qantity is required</span>
           </td>
           <td class="form-group">
-            <input type="text" class="form-control" formControlName="actualQty" placeholder="actualQty">
+            <input type="number" class="form-control" formControlName="actualQty" placeholder="actualQty">
             <span class="text-danger" *ngIf="group.get('actualQty')?.touched && group.get('actualQty')?.invalid">Device
               is required</span>
           </td>
@@ -55,7 +55,7 @@
               time is required</span>
           </td>
           <td class="form-group">
-            <input type="datetime-local" class="form-control" formControlName="endTime" placeholder="endTime">
+            <input type="datetime-local" class="form-control" formControlName="endTime" (change)="dateChange(i, 'endDate', group)" placeholder="endTime">
             <span class="text-danger" *ngIf="group.get('endTime')?.touched && group.get('endTime')?.invalid">End time is
               required</span>
           </td>

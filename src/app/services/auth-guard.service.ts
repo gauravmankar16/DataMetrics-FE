@@ -11,7 +11,15 @@ export class AuthGuardService {
     private _router: Router
   ) { }
   canActivate(next: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<boolean> | Promise<boolean> | boolean {
-    if (this._authService.getToken()) {
+    const jwtToken = this._authService.getToken();
+    if (jwtToken) {
+      const expires = new Date(JSON.parse(atob(jwtToken.split('.')[1])).exp * 1000);
+      const timeout = expires.getTime() - Date.now();
+      setTimeout(() => {
+        this._authService.logout();
+        alert('Session expired! Please login again.');
+      }, timeout);
+
       return true;
     }
     // navigate to login page

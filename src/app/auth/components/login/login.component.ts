@@ -24,10 +24,10 @@ export class LoginComponent implements OnInit {
     this._api.postTypeRequest('user/login', form.value).subscribe((res: any) => {
 
       if (res.status) {
-
         this._auth.setDataInLocalStorage('userData', JSON.stringify(res.data));
         this._auth.setDataInLocalStorage('token', res.token);
         this._router.navigate(['']);
+        this._auth.isLogin = true;
       } else {
         alert(res.msg)
       }

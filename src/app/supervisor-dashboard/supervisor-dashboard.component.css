@@ -1,32 +1,23 @@
-.mat-column-deviceId {
-  width: 7%;
-  max-width: 7%;
+.table{
+  width: 100%;
+}
+.table > :not(caption) > * > * {
+  padding: 5px !important;
 }
 .mat-header-cell {
   font-size: 14px;
   font-weight: bold;
 }
-/* .mat-column-jobName {
-  width: 20%;
-  max-width: 20%;
+
+.jobTable tr > *:nth-child(2) { width:16%; }
+.jobTable tr > *:nth-child(3) { width:16%; }
+/* .jobTable tr > *:nth-child(6) { width:5%; }
+.jobTable tr > *:nth-child(7) { width:5%; } */
+.jobTable tr > *:nth-child(8) { width:22%; }
+
+.classIp {
+  text-overflow: ellipsis;
 }
-.mat-column-expectedOp {
-  width: 7%;
-  max-width: 7%;
+.timeIp {
+  width: 85%;
 }
-.mat-column-actualOp {
-  width: 7%;
-  max-width: 7%;
-}
-.mat-column-startTime {
-  width: 20%;
-  max-width: 20%;
-}
-.mat-column-endTime {
-  width: 19%;
-  max-width: 19%;
-}
-.mat-column-operatorName {
-  width: 20%;
-  max-width: 20%;
-} */

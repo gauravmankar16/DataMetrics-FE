@@ -1,15 +1,15 @@
-<div class="container-fluid p-1">
+<div class="container-fluid pt-1">
   <form [formGroup]="jobForm">
-    <table class="table">
+    <table class="table jobTable">
       <thead>
-        <th>Machine</th>
-        <th>Job Name</th>
-        <th>Operator Name</th>
-        <th style="width: 120px;">Target Quantity</th>
-        <th style="width: 120px;">Actual Quantity</th>
-        <th>Start Time</th>
-        <th>End Time</th>
-        <th>Remarks</th>
+        <th class="machine">Machine</th>
+        <th class="jobName">Job Name</th>
+        <th class="opName">Operator Name</th>
+        <th class="targetQty">Target Qty</th>
+        <th class="actualQty">Actual Qty</th>
+        <th class="startTime">Start Time</th>
+        <th class="endTime">End Time</th>
+        <th class="remarks">Remarks</th>
       </thead>
       <tbody formArrayName="jobs" *ngFor="let group of getFormData.controls; let i=index">
         <tr [formGroupName]="i">
@@ -34,7 +34,7 @@
               required</span>
           </td>
           <td class="form-group">
-            <input type="text" class="form-control" formControlName="operatorName" placeholder="operatorName">
+            <input type="text" class="form-control" (change)="operatorChange(i, group)" formControlName="operatorName" placeholder="operatorName">
             <span class="text-danger"
               *ngIf="group.get('operatorName')?.touched && group.get('operatorName')?.invalid">Operator name is
               required</span>
@@ -50,17 +50,17 @@
               is required</span>
           </td>
           <td class="form-group">
-            <input type="datetime-local" class="form-control" formControlName="startTime" placeholder="startTime">
+            <input type="datetime-local" class="form-control timeIp" formControlName="startTime" min="{{today}}" placeholder="startTime">
             <span class="text-danger" *ngIf="group.get('startTime')?.touched && group.get('startTime')?.invalid">Start
               time is required</span>
           </td>
           <td class="form-group">
-            <input type="datetime-local" class="form-control" formControlName="endTime" (change)="dateChange(i, 'endDate', group)" placeholder="endTime">
+            <input type="datetime-local" class="form-control timeIp" formControlName="endTime" min="{{today}}" (change)="dateChange(i, 'endDate', group)" placeholder="endTime">
             <span class="text-danger" *ngIf="group.get('endTime')?.touched && group.get('endTime')?.invalid">End time is
               required</span>
           </td>
           <td class="form-group">
-            <input type="text" class="form-control" formControlName="remarks" placeholder="remarks">
+            <input type="text" class="form-control classIp" title="{{group.get('remarks')?.value}}" formControlName="remarks" placeholder="remarks">
             <!-- <span class="text-danger" *ngIf="group.get('remarks')?.touched && group.get('remarks')?.invalid">Operator name is required</span> -->
           </td>
 
@@ -93,6 +93,6 @@
       </tbody>
     </table>
   </form>
-  <button (click)="addRow()" class="btn btn-primary mr-5">Add new</button>
-  <button (click)="save()" [disabled]="jobForm.invalid" class="btn btn-primary">Save</button>
+  <button (click)="addRow()" class="btn btn-outline-info m-2">Add new</button>
+  <button (click)="save()" [disabled]="jobForm.invalid" class="btn btn-outline-info">Save</button>
 </div>

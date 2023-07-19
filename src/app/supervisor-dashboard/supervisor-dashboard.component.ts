@@ -13,6 +13,7 @@ import { AuthService } from '../services/auth.service';
 export class SupervisorDashboardComponent {
   jobForm: FormGroup;
   savedJobs = [];
+  today = new Date().toISOString().slice(0, 16);
 
   machines = [{
     id: 1,
@@ -102,7 +103,7 @@ export class SupervisorDashboardComponent {
   }
 
   dateChange(i, type, updatedRow) {
-    if (this.savedJobs.length >= i) {
+    if (this.savedJobs.length > i) {
       let orgObj = this.savedJobs[i];
       if (new Date(updatedRow.value.endTime) < new Date(orgObj['endTime'])) {
         this.autoAdjustTargetQty(orgObj, updatedRow.value);
@@ -110,6 +111,12 @@ export class SupervisorDashboardComponent {
         updatedRow.value = orgObj['endTime'];
         alert('End time cannot be increased after setting once. Please create new job.')
       }
+    }
+  }
+
+  operatorChange(i, updatedRow) {
+    if (this.savedJobs.length > i) {
+      updatedRow.controls.remarks.setValue(`System generated: ${this.savedJobs[i]['operatorName']} updated to ${updatedRow.value.operatorName} on ${new Date().toLocaleString()}`);
     }
   }
 
@@ -129,11 +136,11 @@ export class SupervisorDashboardComponent {
 
   save() {
     // console.log('isValid', this.jobForm.valid);
-    const control = this.jobForm.get('jobs') as FormArray;
-    let touchedRows = control.controls.filter(row => row.touched).map(row => row.value);
-    console.log(touchedRows, 'touchedRows\n');
-
-    console.log('value', this.jobForm.getRawValue());
+    // const control = this.jobForm.get('jobs') as FormArray;
+    // let touchedRows = control.controls.filter(row => row.touched).map(row => row.value);
+    // console.log(this.jobForm.value, 'updatedVal\n');
+    // console.log(touchedRows, 'touchedRows\n');
+    console.log(this.jobForm.getRawValue(), 'old Val');
     let userName: string = JSON.parse(localStorage.getItem('userData') || '{}')?.rows[0]?.username;
     let submitForm = this.jobForm.getRawValue();
 
@@ -147,9 +154,12 @@ export class SupervisorDashboardComponent {
     });
 
     this._api.postTypeRequest('manageJobs/save', submitForm).subscribe((res: any) => {
-      console.log(res, 'heya');
       this.jobForm.reset();
-    })
+      this.jobForm = this.fb.group({
+        jobs: this.fb.array([])
+      });
+      this.getJobs();
+    });
   }
 
 

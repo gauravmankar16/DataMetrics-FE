@@ -9,6 +9,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
 import { CommonModule } from '@angular/common';
 import { AppComponent } from './app.component';
@@ -22,6 +23,9 @@ import { ProfileComponent } from './main/profile/profile.component';
 import { HTTP_INTERCEPTORS } from '@angular/common/http';
 import { InterceptorService } from './services/interceptor-service.service';
 import { MatSelectModule } from '@angular/material/select';
+import { SpinnerComponent } from './components/spinner/spinner.component';
+import { LoaderService } from './services/loader.service';
+import { LoaderInterceptor } from './interceptors/loader-interceptor.service';
 
 @NgModule({
   declarations: [
@@ -29,7 +33,8 @@ import { MatSelectModule } from '@angular/material/select';
     SupervisorDashboardComponent,
     HeaderComponent,
     HomeComponent,
-    ProfileComponent
+    ProfileComponent,
+    SpinnerComponent
   ],
   imports: [
     BrowserModule,
@@ -46,12 +51,19 @@ import { MatSelectModule } from '@angular/material/select';
     AppRoutingModule,
     RouterModule,
     AuthModule,
-    MatSelectModule
+    MatSelectModule,
+    MatProgressSpinnerModule
   ],
   providers: [
+    LoaderService,
     {
       provide: HTTP_INTERCEPTORS,
       useClass: InterceptorService,
+      multi: true
+    },
+    {
+      provide: HTTP_INTERCEPTORS,
+      useClass: LoaderInterceptor,
       multi: true
     }
   ],
